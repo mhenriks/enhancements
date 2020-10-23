@@ -75,14 +75,14 @@ E.g.
 
 [Alibaba Cloud Controller Manager](https://github.com/AliyunContainerService/alicloud-controller-manager) is a working implementation of the [Kubernetes Cloud Controller Manager](https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/).
 
-The repo requirements is mainly a copy from [cloudprovider KEP](https://github.com/kubernetes/community/blob/master/keps/sig-cloud-provider/0002-cloud-controller-manager.md#repository-requirements). Open the link for more detail.
+The repo requirements is mainly a copy from [cloudprovider KEP](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cloud-provider/20180530-cloud-controller-manager.md#repository-requirements). Open the link for more detail.
 
 ### User Experience Reports
 As a CNCF Platinum member, Alibaba Cloud is dedicated in providing users with highly secure , stable and efficient cloud service.
 Usage of aliyun container services can be seen from github issues in the existing alicloud controller manager repo: https://github.com/AliyunContainerService/alicloud-controller-manager/issues
 
 ### Testgrid Integration
- Alibaba cloud provider is reporting conformance test results to TestGrid as per the [Reporting Conformance Test Results to Testgrid KEP](https://github.com/kubernetes/community/blob/master/keps/sig-cloud-provider/0018-testgrid-conformance-e2e.md).
+ Alibaba cloud provider is reporting conformance test results to TestGrid as per the [Reporting Conformance Test Results to Testgrid KEP](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cloud-provider/0018-testgrid-conformance-e2e.md).
  See [report](https://k8s-testgrid.appspot.com/conformance-alibaba-cloud-provider#Alibaba%20Cloud%20Provider,%20v1.10) for more details.
 
 ### CNCF Certified Kubernetes

@@ -1,0 +1,23 @@
+title: "Scheduler Component Config API"
+kep-number: 785
+authors:
+  - "@alculquicondor"
+owning-sig: sig-scheduling
+participating-sigs:
+  - sig-architecture
+status: implementable
+creation-date: 2020-05-08
+reviewers:
+  - "@Huang-Wei"
+approvers:
+  - "@ahg-g"
+  - "@liggitt"
+prr-approvers:
+  - "@wojtek-t"
+see-also:
+  - "/keps/sig-scheduling/1451-multi-scheduling-profiles"
+stage: beta
+latest-milestone: "v1.19"
+milestone:
+  beta: "v1.19"
+  stable: "v1.21"

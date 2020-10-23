@@ -16,8 +16,8 @@ approvers:
   - "@dvonthenen"
 editor: TBD
 creation-date: 2019-01-25
-last-updated: 2019-01-25
-status: implementable
+last-updated: 2020-04-09
+status: implemented
 ---
 
 # Supporting Out-of-Tree vSphere Cloud Provider
@@ -70,7 +70,7 @@ This KEP is specifically tracking progress for the vSphere cloud provider.
 
 ### Non-Goals
 
-* Removing in-tree vSphere cloud provider code, this effort falls under the [KEP for removing in-tree providers](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cloud-provider/2019-01-25-removing-in-tree-providers.md).
+* Removing in-tree vSphere cloud provider code, this effort falls under the [KEP for removing in-tree providers](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cloud-provider/20190125-removing-in-tree-providers.md).
 
 ## Proposal
 

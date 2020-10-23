@@ -1,30 +1,30 @@
 aliases:
   sig-api-machinery-leads:
-    - lavalamp
     - deads2k
+    - fedebongio
+    - lavalamp
   sig-apps-leads:
+    - janetkuo
+    - kow3ns
     - mattfarina
     - prydonius
-    - kow3ns
-    - janetkuo
   sig-architecture-leads:
     - derekwaynecarr
     - dims
     - johnbelamaric
   sig-auth-leads:
-    - mikedanese
-    - enj
-    - tallclair
     - deads2k
+    - enj
     - liggitt
     - mikedanese
+    - tallclair
   sig-autoscaling-leads:
+    - gjtempleton
     - mwielgus
   sig-cli-leads:
-    - soltysh
+    - pwittrock
     - seans3
     - soltysh
-    - pwittrock
   sig-cloud-provider-leads:
     - andrewsykim
     - cheftako
@@ -34,163 +34,156 @@ aliases:
     - neolit123
     - timothysc
   sig-contributor-experience-leads:
-    - Phillels
-    - parispittman
+    - castrojo
     - cblecker
+    - mrbobbytables
     - nikhita
   sig-docs-leads:
-    - bradamant3
     - jimangel
+    - kbarnard10
+    - kbhawkey
+    - onlydole
+    - sftim
     - zacharysarah
   sig-instrumentation-leads:
-    - piosz
     - brancz
+    - dashpole
+    - ehashman
+    - logicalhan
   sig-multicluster-leads:
-    - csbell
-    - quinton-hoole
+    - jeremyot
+    - pmorie
   sig-network-leads:
-    - thockin
-    - dcbw
     - caseydavenport
+    - dcbw
+    - thockin
   sig-node-leads:
     - dchen1107
     - derekwaynecarr
-  sig-pm-leads:
-    - calebamiles
-    - idvoretskyi
-    - jdumars
-    - justaugustus
   sig-release-leads:
-    - calebamiles
+    - alejandrox1
     - justaugustus
+    - saschagrunert
     - tpepper
   sig-scalability-leads:
-    - wojtek-t
+    - mm4tt
     - shyamjvs
+    - wojtek-t
   sig-scheduling-leads:
-    - ahg-g
     - Huang-Wei
+    - ahg-g
+  sig-security-leads:
+    - iancoldwater
+    - tabbysable
   sig-service-catalog-leads:
-    #- kibbles-n-bytes # not an org member
     - jberkhahn
-    #- jboyd01 # not an org member
+    - mszostok
   sig-storage-leads:
+    - jsafrane
+    - msau42
     - saad-ali
-    - childsb
+    - xing-yang
   sig-testing-leads:
+    - BenTheElder
     - spiffxp
-    - fejta
     - stevekuznetsov
-    - timothysc
   sig-ui-leads:
     - floreks
-    - maciaszczykm
-    - danielromlein
     - jeefy
+    - maciaszczykm
+  sig-usability-leads:
+    - hpandeycodeit
+    - tashimi
   sig-windows-leads:
+    - benmoss
+    - ddebroy
+    - marosset
     - michmike
-    - patricklang
-  wg-apply-leads:
-    - lavalamp
+  wg-api-expression-leads:
+    - apelisse
+    - kwiesmueller
   wg-component-standard-leads:
-    - luxas
-    - sttts
     - mtaufen
+    - stealthybox
+  wg-data-protection-leads:
+    - xing-yang
+    - yuxiangqian
   wg-iot-edge-leads:
-    #- cindyxing # not an org member
-    #- dejanb # not an org member
-    #- ptone # not an org member
     - cantbewong
+    - cindyxing
+    - dejanb
   wg-k8s-infra-leads:
+    - bartsmykla
     - dims
     - spiffxp
   wg-lts-leads:
-    - tpepper
     - imkin
     - quinton-hoole
+    - tpepper
     - youngnick
-  wg-machine-learning-leads:
-    - vishh
-    - kow3ns
-    - balajismaniam
-    - ConnorDoyle
   wg-multitenancy-leads:
-    - davidopp
+    - srampal
     - tashimi
-  wg-policy-leads:
-    #- hannibalhuang # not an org member
-    #- tsandall # not an org member
-    #- easeway # not an org member
-    #- ericavonb # not an org member
-    #- mdelder # not an org member
-  wg-resource-management-leads:
-    - vishh
-    - derekwaynecarr
-  wg-security-audit-leads:
-    #- aasmall # not an org member
-    - joelsmith
-    #- cji # not an org member
-    #- jaybeale # not an org member
-  ug-big-data-leads:
-    - foxish
-    - erikerlandson
-    - liyinan926
-  committee-code-of-conduct:
-    - jdumars
-    - parispittman
-    - carolynvs
-    - eparis
-    - bradamant3
-  committee-product-security:
-    - philips
-    - cjcullen
-    - tallclair
-    - liggitt
-    - joelsmith
-  committee-steering:
-    - bgrant0607
-    - brendandburns
-    - derekwaynecarr
-    - dims
-    - jbeda
-    - michelleN
-    - philips
-    - pwittrock
-    - sarahnovotny
-    - smarterclayton
-    - spiffxp
-    - timothysc
-## BEGIN CUSTOM CONTENT
-  pm-maintainers:
-    - calebamiles # SIG PM Chair
-    - idvoretskyi # SIG PM Chair
-    - jdumars # SIG PM Chair
-    - justaugustus # SIG PM Chair
-  features-maintainers:
-    - justaugustus # 1.12 Features Lead
-    - claurence # 1.14 Enhancements Lead
-    - kacole2 # 1.15 / 1.13 Enhancements Lead
-  kep-process-approvers:
-    - calebamiles
-    - idvoretskyi
+  wg-naming-leads:
+    - celestehorgan
     - jdumars
     - justaugustus
-  kep-process-reviewers:
+    - zacharysarah
+  wg-policy-leads:
+    - ericavonb
+    - hannibalhuang
+  wg-reliability-leads:
+    - deads2k
+    - stevekuznetsov
+    - wojtek-t
+  ug-big-data-leads:
+    - erikerlandson
+    - foxish
+    - liyinan926
+  ug-vmware-users-leads:
+    - brysonshepherd
+    - cantbewong
+    - mylesagray
+    - phenixblue
+  committee-code-of-conduct:
+    - AevaOnline
+    - celestehorgan
+    - karenhchu
+    - tashimi
+    - tpepper
+  committee-product-security:
+    - cjcullen
+    - cji
+    - joelsmith
+    - lukehinds
+    - micahhausler
+    - swamymsft
+    - tallclair
+  committee-steering:
+    - cblecker
+    - derekwaynecarr
+    - dims
     - lachie83
-  kep-reviewers:
-    - bgrant0607
-    - derekwaynecarr
-    - dims
-    - jbeda
-    - jdumars
-    - mattfarina
-  kep-approvers:
-    - bgrant0607
-    - derekwaynecarr
-    - dims
-    - jbeda
-    - jdumars
-    - mattfarina
+    - nikhita
+    - parispittman
+    - spiffxp
+## BEGIN CUSTOM CONTENT
+  enhancements-approvers:
+    - jeremyrickard
+    - johnbelamaric
+    - justaugustus
+    - LappleApple
+    - mrbobbytables
+  enhancements-reviewers:
+    - jeremyrickard
+    - johnbelamaric
+    - justaugustus
+    - LappleApple
+    - mrbobbytables
+  prod-readiness-approvers:
+    - johnbelamaric
+    - deads2k
+    - wojtek-t
   provider-aws:
     - d-nishi
     - justinsb
@@ -205,9 +198,9 @@ aliases:
   provider-ibmcloud:
     - spzala
   provider-openstack:
-    - adisky
     - chrigl
-    - hogepodge
+    - lingxiankong
+    - ramineni
   provider-vmware:
     - cantbewong
     - frapposelli

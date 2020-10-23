@@ -38,6 +38,7 @@ status: implementable
     - [Results](#results-1)
 - [Alternatives Considered](#alternatives-considered)
   - [gRPC API](#grpc-api)
+  - [Test Plan](#test-plan)
 - [Graduation Criteria](#graduation-criteria)
 - [Implementation History](#implementation-history)
 <!-- /toc -->
@@ -50,7 +51,7 @@ The Kubelet Resource Metrics Endpoint is a new kubelet metrics endpoint which se
 
 The [Monitoring Architecture](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/monitoring_architecture.md) proposal established separate pipelines for Resource Metrics, and for Monitoring Metrics.  The [Core Metrics](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/core-metrics-pipeline.md#core-metrics-in-kubelet) proposal describes the set of metrics that we consider core, and their uses.  Note that the term “core” is overloaded, and this document will refer to these as Resource Metrics, since they are for first class kubernetes resources and are served by the [Resource Metrics API](https://github.com/kubernetes/metrics#resource-metrics-api) at the cluster-level.
 
-A [previous proposal](https://docs.google.com/document/d/1_CdNWIjPBqVDMvu82aJICQsSCbh2BR-y9a8uXjQm4TI/edit?usp=sharing) by @DirectXMan12 also proposed a prometheus endpoint.  The [kubernetes metrics overhaul KEP](https://github.com/kubernetes/enhancements/blob/master/keps/sig-instrumentation/0031-kubernetes-metrics-overhaul.md#export-less-metrics) acknowledges the need to export fewer metrics from the kubelet.  This new API is a step in that direction, as it eliminates the Metric Server's dependency on the Summary API.
+A [previous proposal](https://docs.google.com/document/d/1_CdNWIjPBqVDMvu82aJICQsSCbh2BR-y9a8uXjQm4TI/edit?usp=sharing) by @DirectXMan12 also proposed a prometheus endpoint.  The [kubernetes metrics overhaul KEP](https://github.com/kubernetes/enhancements/blob/master/keps/sig-instrumentation/20181106-kubernetes-metrics-overhaul.md#export-less-metrics) acknowledges the need to export fewer metrics from the kubelet.  This new API is a step in that direction, as it eliminates the Metric Server's dependency on the Summary API.
 
 For the purposes of this document, I will use the following definitions:
 
@@ -88,7 +89,9 @@ This proposal deals with the first problem, which is that the Summary API is a p
 
 ## Proposal
 
-The kubelet will expose an endpoint at `/metrics/resource/v1alpha1` in prometheus text exposition format using the prometheus client library.
+The kubelet will expose an endpoint at `/metrics/resource` in prometheus text exposition format using the prometheus client library.
+
+The metrics in this endpoint will make use of the [Kubernetes Metrics Stability framework](https://github.com/kubernetes/enhancements/blob/master/keps/sig-instrumentation/20190404-kubernetes-control-plane-metrics-stability.md) for stability and deprecation policies.
 
 
 ### API
@@ -204,17 +207,23 @@ service ResourceMetrics {
 }
 ```
 
+### Test Plan
+
+Test the new endpoint with a node-e2e test similar to the current summary API test.
+Testgrid: https://k8s-testgrid.appspot.com/sig-node-kubelet#node-kubelet-features-master&include-filter-by-regex=ResourceMetricsAPI
+
 ## Graduation Criteria
 
 Alpha:
 
-- [ ] Implement the kubelet resource metrics endpoint as described above
-- [ ] Test the new endpoint with a node-e2e test similar to the current summary API test
+- [X] Implement the kubelet resource metrics endpoint as described above
+
+Beta:
+
 - [ ] Modify the metrics server to consume the kubelet resource metrics endpoint 3 releases after it is added to the kubelet
 
-Beta/GA:
+GA:
 
-- [ ] Determine whether a transition to OpenMetrics format is required, and make those changes if necessary
 - [ ] Add node-e2e test to the node conformance tests
 
 ## Implementation History
@@ -223,3 +232,5 @@ Beta/GA:
 - 2019-01-29: Presentation to Sig-Node
 - 2019-02-04: KEP gets LGTM and Approval
 - 2019-02-07: Presentation to Sig-Instrumentation
+- 2020-01-14: [1.18] Endpoint copied from /metrics/resource/v1alpha1 to /metrics/resource, and adopting the metrics stability framework: https://github.com/kubernetes/kubernetes/pull/86282
+- 2020-09-01: [1.20] /metrics/resource/v1alpha1 removed: https://github.com/kubernetes/kubernetes/pull/94272

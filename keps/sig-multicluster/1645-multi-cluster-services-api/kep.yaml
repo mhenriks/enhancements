@@ -1,0 +1,18 @@
+title: Multi-Cluster Services API
+kep-number: 1645
+authors:
+  - "@jeremyot"
+owning-sig: sig-multicluster
+participating-sigs:
+  - sig-network
+status: implementable
+creation-date: 2020-03-30
+reviewers:
+  - "@johnbelamaric"
+  - "@janetkuo"
+  - "@danwinship"
+  - "@deads2k"
+  - "@liggitt"
+approvers:
+  - "@pmorie"
+  - "@thockin"

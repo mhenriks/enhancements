@@ -1,0 +1,30 @@
+title: Kubernetes Yearly Support Period
+authors:
+  - "@imkin"
+  - "@liggitt"
+  - "@tpepper"
+  - "@jberkus"
+  - "@youngnick"
+owning-sig: sig-release
+participating-sigs:
+  - sig-architecture
+  - sig-testing
+  - sig-release
+  - sig-api-machinery
+  - sig-node
+  - sig-cli
+reviewers:
+  - "@quinton_hoole"
+approvers:
+  - "@justaugustus"
+  - "@spiffxp"
+  - "@bgrant"
+  - "@deads2k"
+  - "@dchen1107"
+  - "@pwittrock"
+creation-date: 2020-01-22
+latest-milestone: v1.19
+status: implemented
+see-also:
+replaces:
+superseded-by:

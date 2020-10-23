@@ -16,8 +16,8 @@ approvers:
   - saad-ali
 editor: TBD
 creation-date: 2019-01-24
-last-updated: 2019-01-24
-status: implementable
+last-updated: 2020-04-16
+status: implemented
 see-also:
   - "https://github.com/kubernetes/community/blob/master/contributors/design-proposals/storage/volume-topology-scheduling.md"
 replaces:
@@ -73,6 +73,7 @@ superseded-by:
   - [K8s 1.9: Alpha](#k8s-19-alpha)
   - [K8s 1.10: Beta](#k8s-110-beta)
   - [K8s 1.12: Beta](#k8s-112-beta)
+  - [K8s 1.14: GA](#k8s-114-ga)
 - [Infrastructure Needed](#infrastructure-needed)
 <!-- /toc -->
 
@@ -763,7 +764,7 @@ enables delaying PVC binding until a pod is scheduled. This addresses the limita
 ### K8s 1.10: Beta
 
 * `NodeAffinity` beta field was added to PersistentVolume, and the alpha annotation was deprecated.
-    * A [one-time job](https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner/blob/master/utils/update-pv-to-beta)
+    * A [one-time job](https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner/tree/v2.3.0/utils/update-pv-to-beta)
 was added to help users migrate from the alpha annotation to the beta field.
 * Raw block alpha support was added specified by PV.volumeMode = `Block`.
 
@@ -771,6 +772,9 @@ was added to help users migrate from the alpha annotation to the beta field.
 
 * If PV.volumeMode = `Filesystem` but the local volume path was a block device, then Kubernetes will automatically
 format the device with the filesystem type specified in `FSType`.
+
+### K8s 1.14: GA
+
 
 ## Infrastructure Needed
 

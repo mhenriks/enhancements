@@ -49,6 +49,8 @@ _Reviewers:_
 - [Proposal](#proposal)
   - [Proposed Changes](#proposed-changes)
     - [New Component: Topology Manager](#new-component-topology-manager)
+      - [The Effective Resource Request/Limit of a Pod](#the-effective-resource-requestlimit-of-a-pod)
+      - [Scopes](#scopes)
       - [Policies](#policies)
       - [Computing Preferred Affinity](#computing-preferred-affinity)
       - [New Interfaces](#new-interfaces)
@@ -57,7 +59,8 @@ _Reviewers:_
 - [Graduation Criteria](#graduation-criteria)
   - [Alpha (v1.16) [COMPLETED]](#alpha-v116-completed)
   - [Alpha (v1.17) [COMPLETED]](#alpha-v117-completed)
-  - [Beta (target v1.18)](#beta-target-v118)
+  - [Beta (v1.18) [COMPLETED]](#beta-v118-completed)
+  - [Beta (v1.19)](#beta-v119)
   - [GA (stable)](#ga-stable)
 - [Test Plan](#test-plan)
   - [Single NUMA Systems Tests](#single-numa-systems-tests)
@@ -166,11 +169,11 @@ the assigned CPUs and devices.
 
 Topology affinity is tracked at the container level, similar to devices and
 CPU affinity. At pod admission time, a new component called the Topology
-Manager collects possible configurations from the Device Manager and the
-CPU Manager. The Topology Manager acts as an oracle for local alignment by
-those same components when they make concrete resource allocations. We
-expect the consulted components to use the inferred QoS class of each
-pod in order to prioritize the importance of fulfilling optimal locality.
+Manager collects possible configurations for each container in the pod from the
+Device Manager and the CPU Manager. The Topology Manager acts as an oracle
+for local alignment by those same components when they make concrete resource
+allocations. We expect the consulted components to use the inferred QoS class
+of each pod in order to prioritize the importance of fulfilling optimal locality.
 
 ## Proposed Changes
 
@@ -180,7 +183,8 @@ This proposal is focused on a new component in the Kubelet called the
 Topology Manager. The Topology Manager implements the pod admit handler
 interface and participates in Kubelet pod admission. When the `Admit()`
 function is called, the Topology Manager collects topology hints from other
-Kubelet components.
+Kubelet components on either a pod-by-pod, or a container-by-container basis, 
+depending on the scope that has been set via a kubelet flag.
 
 If the hints are not compatible, the Topology Manager may choose to
 reject the pod. Behavior in this case depends on a new Kubelet configuration
@@ -195,14 +199,65 @@ The Topology Hint currently consists of
       * For each Hint Provider, there is a possible resource assignment that satisfies the request, such that the least possible number of NUMA nodes is involved (caculated as if the node were empty.)
       * There is a possible assignment where the union of involved NUMA nodes for all such resource is no larger than the width required for any single resource.
 
+#### The Effective Resource Request/Limit of a Pod
+
+All Hint Providers should consider the effective resource request/limit to calculate reliable topology hints, this rule is defined by the [concept of init containers][the-rule-of-effective-request-limit].
+
+The effective resource request/limit of a pod is determined by the larger of :
+- The highest of any particular resource request or limit defined on all init containers.
+- The sum of all app containers request/limit for a resource.
+
+The below example shows how it works briefly.
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example
+spec:
+  containers:
+  - name: appContainer1
+    resources:
+      requests:
+        cpu: 2
+        memory: 1G
+  - name: appContainer2
+      resources:
+      requests:
+        cpu: 1
+        memory: 1G
+  initContainers:
+  - name: initContainer1
+      resources:
+      requests:
+        cpu: 2
+        memory: 1G
+  - name: initContainer2
+      resources:
+      requests:
+        cpu: 2
+        memory: 3G
+
+#Effective resource request: CPU: 3, Memory: 3G
+```
+
+The [debug][debug-container]/[ephemeral][ephemeral-container] containers are not able to specify resource limit/request, so it does not affect topology hint generation.
+
+#### Scopes
+
+The Topology Manager will attempt to align resources on either a pod-by-pod or a container-by-container basis depending on the value of a new kubelet flag, `--topology-manager-scope`. The values this flag can take on are detailed below:
+
+**container (default)**: The Topology Manager will collect topology hints from all Hint Providers on a container-by-container basis. Individual policies will then attempt to align resources for each container individually, and pod admission will be based on whether all containers were able to achieve their individual alignments or not.
+
+**pod**: The Topology Manager will collect topology hints from all Hint Providers on a pod-by-pod basis. Individual policies will then attempt to align resources for all containers collectively, and pod admission will be based on whether all containers are able to achieve a common alignment or not.
+
 #### Policies
 
 **none (default)**: Kubelet does not consult Topology Manager for placement decisions. 
 
-**best-effort**: Topology Manager will provide the preferred allocation for the container based
+**best-effort**: Topology Manager will provide the preferred allocation based
 on the hints provided by the Hint Providers. If an undesirable allocation is determined, the pod will be admitted with this undesirable allocation.
 
-**restricted**: Topology Manager will provide the preferred allocation for the container based
+**restricted**: Topology Manager will provide the preferred allocation based
 on the hints provided by the Hint Providers. If an undesirable allocation is determined, the pod will be rejected. 
 This will result in the pod being in a `Terminated` state, with a pod admission failure.
 
@@ -306,9 +361,23 @@ type TopologyHint struct {
 // topology-related resource assignments. The Topology Manager consults each
 // hint provider at pod admission time.
 type HintProvider interface {
-  // Returns hints if this hint provider has a preference; otherwise
-  // returns `nil` to indicate "don't care".
+  // GetTopologyHints returns a map of resource names with a list of possible
+  // resource allocations in terms of NUMA locality hints. Each hint
+  // is optionally marked "preferred" and indicates the set of NUMA nodes
+  // involved in the hypothetical allocation. The topology manager calls
+  // this function for each hint provider, and merges the hints to produce
+  // a consensus "best" hint. The hint providers may subsequently query the
+  // topology manager to influence actual resource assignment.
   GetTopologyHints(pod v1.Pod, containerName string) map[string][]TopologyHint
+  // GetPodLevelTopologyHints returns a map of resource names with a list of 
+  // possible resource allocations in terms of NUMA locality hints.
+  // The returned map contains TopologyHint of requested resource by all containers
+  // in a pod spec.
+  GetPodLevelTopologyHints(pod *v1.Pod) map[string][]TopologyHint
+  // Allocate triggers resource allocation to occur on the HintProvider after
+  // all hints have been gathered and the aggregated Hint is available via a
+  // call to Store.GetAffinity().
+  Allocate(pod *v1.Pod, container *v1.Container) error
 }
 
 // Store manages state related to the Topology Manager.
@@ -351,6 +420,11 @@ A new feature gate will be added to enable the Topology Manager feature. This fe
  
  * Proposed Policy Flag:  
  `--topology-manager-policy=none|best-effort|restricted|single-numa-node`  
+
+Based on the policy chosen, the following flag will determine the scope with which the policy is applied (i.e. either on a pod-by-pod or a container-by-container basis). The `container` scope will be the default scope.
+
+ * Proposed Scope Flag:  
+ `--topology-manager-scope=container|pod`  
  
 ### Changes to Existing Components
 
@@ -360,10 +434,10 @@ A new feature gate will be added to enable the Topology Manager feature. This fe
        feature gate is disabled.
     1. Add a functional Topology Manager that queries hint providers in order
        to compute a preferred socket mask for each container.
-1. Add `GetTopologyHints()` method to CPU Manager.
+1. Add `GetTopologyHints()` and `GetPodLevelTopologyHints()` method to CPU Manager.
     1. CPU Manager static policy calls `GetAffinity()` method of
        Topology Manager when deciding CPU affinity.
-1. Add `GetTopologyHints()` method to Device Manager.
+1. Add `GetTopologyHints()` and `GetPodLevelTopologyHints()` method to Device Manager.
     1. Add `TopologyInfo` to Device structure in the device plugin
        interface. Plugins should be able to determine the NUMA Node(s)
        when enumerating supported devices. See the protocol diff below.
@@ -413,6 +487,91 @@ _Figure: Topology Manager hint provider registration._
 
 _Figure: Topology Manager fetches affinity from hint providers._
 
+Additionally, we propose an extension to the device plugin interface as a
+"last-level" filter to help influence overall allocation decisions made by the
+`devicemanager`. The diff below shows the proposed changes:
+
+```diff
+diff --git a/pkg/kubelet/apis/deviceplugin/v1beta1/api.proto b/pkg/kubelet/apis/deviceplugin/v1beta1/api.proto
+index 758da317fe..1e55d9c541 100644
+--- a/pkg/kubelet/apis/deviceplugin/v1beta1/api.proto
++++ b/pkg/kubelet/apis/deviceplugin/v1beta1/api.proto
+@@ -55,6 +55,11 @@ service DevicePlugin {
+    // returns the new list
+    rpc ListAndWatch(Empty) returns (stream ListAndWatchResponse) {}
+
++   // GetPreferredAllocation returns a preferred set of devices to allocate 
++   // from a list of available ones. The resulting preferred allocation is not
++   // guaranteed to be the allocation ultimately performed by the
++   // `devicemanager`. It is only designed to help the `devicemanager` make a
++   //  more informed allocation decision when possible.
++   rpc GetPreferredAllocation(PreferredAllocationRequest) returns (PreferredAllocationResponse) {}
++
+    // Allocate is called during container creation so that the Device
+    // Plugin can run device specific operations and instruct Kubelet
+    // of the steps to make the Device available in the container
+@@ -99,6 +104,31 @@ message PreStartContainerRequest {
+ message PreStartContainerResponse {
+ }
+
++// PreferredAllocationRequest is passed via a call to
++// `GetPreferredAllocation()` at pod admission time. The device plugin should
++// take the list of `available_deviceIDs` and calculate a preferred allocation
++// of size `size` from them, making sure to include the set of devices listed
++// in `must_include_deviceIDs`.
++message PreferredAllocationRequest {
++   repeated string available_deviceIDs = 1;
++   repeated string must_include_deviceIDs = 2;
++   int32 size = 3;
++}
++
++// PreferredAllocationResponse returns a preferred allocation,
++// resulting from a PreferredAllocationRequest.
++message PreferredAllocationResponse {
++   ContainerAllocateRequest preferred_allocation = 1;
++}
++
+ // - Allocate is expected to be called during pod creation since allocation
+ //   failures for any container would result in pod startup failure.
+ // - Allocate allows kubelet to exposes additional artifacts in a pod's
+```
+
+Using this new API call, the `devicemanager` will call out to a plugin at pod
+admission time, asking it for a preferred device allocation of a given size
+from a list of available devices. One call will be made per-container for each
+pod.
+
+The list of available devices passed to the `GetPreferredAllocation()` call
+do not necessarily match the full list of available devices on the system.
+Instead, the `devicemanager` treats the `GetPreferredAllocation()` call as
+a "last-level" filter on the set of devices it has to choose from after taking
+all `TopologyHint` information into consideration. As such, the list of
+available devices passed to this call will already be pre-filtered by the
+topology constraints encoded in the `TopologyHint`.
+
+The preferred allocation is not guaranteed to be the allocation ultimately
+performed by the `devicemanager`. It is only designed to help the
+`devicemanager` make a more informed allocation decision when possible.
+
+When deciding on a preferred allocation, a device plugin will likely take
+internal topology-constraints into consideration, that the `devicemanager` is
+unaware of. A good example of this is the case of allocating pairs of NVIDIA
+GPUs that always include an NVLINK.
+
+On an 8 GPU machine, with a request for 2 GPUs, the best connected pairs by
+NVLINK might be:
+
+```
+{{0,3}, {1,2}, {4,7}, {5,6}}
+```
+
+Using `GetPreferredAllocation()` the NVIDIA device plugin is able to forward
+one of these preferred allocations to the device manager if the appropriate set
+of devices are still available. Without this extra bit of information, the
+`devicemanager` would end up picking GPUs at random from the list of GPUs
+available after filtering by `TopologyHint`. This API, allows it to ultimately
+perform a much better allocation, with minimal cost.
+
 # Graduation Criteria
 
 ## Alpha (v1.16) [COMPLETED]
@@ -428,13 +587,17 @@ _Figure: Topology Manager fetches affinity from hint providers._
 
 * Allow pods in all QoS classes to request aligned resources.
 
-## Beta (target v1.18)
+## Beta (v1.18) [COMPLETED]
 
 * Enable the feature gate by default.
 * Provide beta-level documentation.
 * Add node E2E tests.
 * Guarantee aligned resources for multiple containers in a pod.
 * Refactor to easily support different merge strategies for different policies.
+
+## Beta (v1.19)
+
+* Support pod-level resource alignment.
 
 ## GA (stable)
 
@@ -484,13 +647,16 @@ systems test.
 * Testing the Topology Manager in a continuous integration environment
   depends on cloud infrastructure to expose multi-node topologies
   to guest virtual machines.
-* Implementing the `GetHints()` interface may prove challenging.
+* Implementing the `HintProvider` interface may prove challenging.
 
 # Limitations
 
-* Alignment is only possible for pods in the `Guaranteed` QoS class.
-* Alignment is only guaranteed for a single container inside a pod.
-
+* The maximum number of NUMA nodes that Topology Manager will allow is 8,
+  past this there will be a state explosion when trying to enumerate the
+  possible NUMA affinities and generating their hints.
+* The scheduler is not topology-aware, so it is possible to be scheduled
+  on a node and then fail on the node due to the Topology Manager.
+  
 # Alternatives
 
 * [AutoNUMA][numa-challenges]: This kernel feature affects memory
@@ -505,3 +671,6 @@ systems test.
 [sriov-issue-10]: https://github.com/hustcat/sriov-cni/issues/10
 [proposal-affinity]: https://github.com/kubernetes/community/pull/171
 [numa-challenges]: https://queue.acm.org/detail.cfm?id=2852078
+[the-rule-of-effective-request-limit]: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#resources
+[debug-container]: https://kubernetes.io/docs/tasks/debug-application-cluster/debug-running-pod/#ephemeral-container
+[ephemeral-container]: https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/

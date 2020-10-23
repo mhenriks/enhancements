@@ -49,9 +49,27 @@ reviewers:
 approvers:
   - "@deads2k"
   - "@lavalamp"
+prr-approvers:
+  - "@wojtek-t"
 creation-date: 2018-04-15
 last-updated: 2018-04-24
 status: provisional
+
+stage: beta
+latest-milestone: "v1.19"
+milestone:
+  alpha: "v1.19"
+  beta: "v1.20"
+  stable: "v1.22"
+
+feature-gates:
+  - name: MyFeature
+    components:
+      - kube-apiserver
+      - kube-controller-manager
+disable-supported: true
+metrics:
+  - my_feature_metric
 ---`,
 		},
 	}

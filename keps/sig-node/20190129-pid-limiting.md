@@ -42,6 +42,7 @@ superseded-by:
   - [Version 1.10](#version-110)
   - [Version 1.14](#version-114)
   - [Version 1.15](#version-115)
+  - [Version 1.20](#version-120)
 <!-- /toc -->
 
 ## Summary
@@ -159,6 +160,28 @@ GA
 
 Adding support for pid limiting at the Node Allocatable level 
 
+Eviction will rank based on priority, followed by the number of processes used.
+To integrate this into the eviction manager's control loops, we will add pod-level
+ProcessStats:
+
+```golang
+// ProcessStats are stats pertaining to processes.
+type ProcessStats struct {
+  // Number of processes
+  // +optional
+  ProcessCount *uint64 `json:"process_count,omitempty"`
+}
+
+// PodStats holds pod-level unprocessed sample stats.
+type PodStats struct {  type PodStats struct {
+  ...
+  // ProcessStats pertaining to processes.
+  // +optional
+  ProcessStats *ProcessStats `json:"process_stats,omitempty"`
+}
+```
+
+
 The following criteria applies to `SupportNodePidsLimit`:
 
 Alpha
@@ -190,3 +213,8 @@ GA
 
 - Graduate `SupportNodePidsLimit` to beta by adding node e2e test
   coverage for node cgroup isoation.
+
+### Version 1.20
+
+- Graduate `SupportNodePidsLimit` to GA after year of production usage.
+- Graduate `SupportPodPidsLimit` to GA after year of production usage.
